@@ -1,101 +1,90 @@
-import Image from "next/image";
+'use client'
+
+import { useState } from 'react'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { ThemeProvider } from '@/components/theme-provider'
+import { ThemeToggle } from '@/components/theme-toggle'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { LangflowClient } from '@/lib/langflow-client'
+import type { PostType } from '@/types'
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [postType, setPostType] = useState<PostType>('static')
+  const [output, setOutput] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+  const handleGenerate = async () => {
+    setIsLoading(true)
+    setOutput('')
+
+    const client = new LangflowClient()
+
+    try {
+      const response = await client.generateContent(postType)
+
+      // Directly use the cleaned-up response (content) to set the output
+      if (response && response.content) {
+        setOutput(response.content)
+      } else {
+        setOutput('No content generated')
+      }
+
+      setIsLoading(false)
+    } catch (error) {
+      console.error('Error:', error)
+      setIsLoading(false)
+      setOutput('Error generating content')
+    }
+  }
+
+  return (
+    <ThemeProvider>
+      <div className="min-h-screen bg-background text-foreground">
+        <header className="border-b">
+          <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 className="text-2xl font-bold">Social Media Performance Analysis</h1>
+            <ThemeToggle />
+          </div>
+        </header>
+
+        <main className="container mx-auto px-4 py-8">
+          <Card className="p-6">
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium mb-2">Select Post Type</label>
+                <Select value={postType} onValueChange={(value) => setPostType(value as PostType)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select post type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="carousel">Carousel</SelectItem>
+                    <SelectItem value="static">Static</SelectItem>
+                    <SelectItem value="reels">Reels</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button
+                onClick={handleGenerate}
+                disabled={isLoading}
+                className="w-full"
+              >
+                {isLoading ? 'Generating...' : 'Generate Post'}
+              </Button>
+
+              {output && (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium">Generated Content</label>
+                  <Card className="p-4 bg-muted">
+                    <pre className="whitespace-pre-wrap">{output}</pre>
+                  </Card>
+                </div>
+              )}
+            </div>
+          </Card>
+        </main>
+      </div>
+    </ThemeProvider>
+  )
 }
