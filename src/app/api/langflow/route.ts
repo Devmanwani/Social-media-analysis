@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     console.log(extractedText)
     // Return the cleaned-up response
     return NextResponse.json({ content: extractedText });
-  } catch (error) {
+  } catch (error: any) {
     console.error('API Error:', error);
     return NextResponse.json(
       { error: 'Internal Server Error', details: error.message },
