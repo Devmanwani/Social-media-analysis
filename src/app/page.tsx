@@ -70,7 +70,7 @@ export default function Home() {
                 disabled={isLoading}
                 className="w-full"
               >
-                {isLoading ? 'Generating...' : 'Generate Post'}
+                {isLoading ? 'Generating...' : 'Generate Insights'}
               </Button>
 
               {output && (
